@@ -5,7 +5,7 @@ A Lethal Company mod which displays the value of held scrap items on the HUD. Yo
 - Configurable position and size.
 - LethalConfig support.
 
-[](!https://raw.githubusercontent.com/EliteMasterEric/ScrapValueHUD/refs/heads/main/Art/Example.jpg)
+[](!https://raw.githubusercontent.com/EliteMasterEric/ScrapValueHUD/refs/heads/main/Art/Example.png)
 
 ## Bugs
 
