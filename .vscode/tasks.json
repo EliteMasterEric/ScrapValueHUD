@@ -7,15 +7,20 @@
 			"command": "dotnet",
 			"args": [
 				"build",
+				"-c",
+				"Release",
 				"${workspaceFolder}/ScrapValueHUD.sln",
-				"-c Release",
 				"/property:GenerateFullPaths=true",
 				"/consoleloggerparameters:NoSummary",
 				"--no-dependencies"
 			],
 			"problemMatcher": [
 				"$msCompile"
-			]
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
 		}
 	]
 }

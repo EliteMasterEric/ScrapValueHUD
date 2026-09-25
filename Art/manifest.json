@@ -1,0 +1,9 @@
+{
+    "name": "ScrapValueHUD",
+    "version_number": "1.0.0",
+    "website_url": "https://github.com/EliteMasterEric/ScrapValueHUD",
+    "description": "Display the worth of held scrap items on the HUD.",
+    "dependencies": [
+        "BepInEx-BepInExPack-5.4.2100"
+    ]
+}
