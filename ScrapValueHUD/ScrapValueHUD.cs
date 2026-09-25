@@ -1,14 +1,10 @@
 using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
-using LobbyCompatibility.Attributes;
-using LobbyCompatibility.Enums;
 
 namespace ScrapValueHUD
 {
     [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
-    // [BepInDependency("BMX.LobbyCompatibility", BepInDependency.DependencyFlags.HardDependency)]
-    // [LobbyCompatibility(CompatibilityLevel.ClientOnly, VersionStrictness.None)]
     public class ScrapValueHUD : BaseUnityPlugin
     {
         public static ScrapValueHUD Instance { get; private set; } = null!;
@@ -19,6 +15,8 @@ namespace ScrapValueHUD
         {
             Logger = base.Logger;
             Instance = this;
+
+            PluginConfig.Initialize(Config);
 
             Patch();
 
