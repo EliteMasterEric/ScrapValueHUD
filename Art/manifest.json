@@ -1,6 +1,6 @@
 {
     "name": "ScrapValueHUD",
-    "version_number": "1.0.0",
+    "version_number": "1.0.1",
     "website_url": "https://github.com/EliteMasterEric/ScrapValueHUD",
     "description": "Display the worth of held scrap items on the HUD.",
     "dependencies": [
