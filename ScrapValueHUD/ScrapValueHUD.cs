@@ -1,10 +1,12 @@
 using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
+using ScrapValueHUD.Compatibility;
 
 namespace ScrapValueHUD
 {
     [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
+    [BepInDependency("ainavt.lc.lethalconfig", BepInDependency.DependencyFlags.SoftDependency)] // Load after LethalConfig if present
     public class ScrapValueHUD : BaseUnityPlugin
     {
         public static ScrapValueHUD Instance { get; private set; } = null!;
@@ -16,7 +18,9 @@ namespace ScrapValueHUD
             Logger = base.Logger;
             Instance = this;
 
-            PluginConfig.Initialize(Config);
+            ScrapValueHUDConfig.Initialize(Config);
+
+            SetupCompatibility();
 
             Patch();
 
@@ -32,6 +36,15 @@ namespace ScrapValueHUD
             Harmony.PatchAll();
 
             Logger.LogDebug("Finished patching!");
+        }
+
+        internal static void SetupCompatibility()
+        {
+            if (BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("ainavt.lc.lethalconfig"))
+            {
+                Logger.LogInfo("LethalConfig detected, setting up compatibility...");
+                LethalConfigCompat.Setup();
+            }
         }
 
         internal static void Unpatch()

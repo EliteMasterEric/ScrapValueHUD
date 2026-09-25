@@ -15,6 +15,9 @@ namespace ScrapValueHUD
     {
         const int NoValue = int.MinValue;
 
+        const int LeftOffset = -4;
+        const int BottomOffset = 0;
+
         // Singleton instance.
         private static ScrapValueHUDUI? instance;
 
@@ -35,7 +38,7 @@ namespace ScrapValueHUD
             slotLabels = new TextMeshProUGUI[hud.itemSlotIconFrames.Length];
             for (int i = 0; i < slotLabels.Length; i++)
             {
-                slotLabels[i] = CreateLabel(hud.itemSlotIconFrames[i].transform, hud, "ScrapValueSlot" + i);
+                slotLabels[i] = CreateLabel(hud.itemSlotIconFrames[i].transform, "ScrapValueSlot" + i);
             }
 
             instance = this;
@@ -52,7 +55,7 @@ namespace ScrapValueHUD
         /// </summary>
         private static void ResetItemSlotIconFrames(HUDManager hud)
         {
-            if (!PluginConfig.FixRotation.Value) return;
+            if (!ScrapValueHUDConfig.FixRotation.Value) return;
 
             for (int i = 0; i < hud.itemSlotIconFrames.Length; i++)
             {
@@ -67,26 +70,35 @@ namespace ScrapValueHUD
         /// <summary>
         /// Refreshes the slot labels belonging to the local player, if the overlay exists.
         /// </summary>
-        internal static void RefreshLabels()
+        internal static void RefreshLabels(bool updateDisplay = false)
         {
-            if (instance != null) instance.Refresh();
+            if (instance != null) instance.Refresh(updateDisplay);
         }
 
-        private static TextMeshProUGUI CreateLabel(Transform parent, HUDManager hud, string name)
+        private static TextMeshProUGUI CreateLabel(Transform parent, string name)
         {
             GameObject labelObject = new GameObject(name, typeof(RectTransform));
             labelObject.transform.SetParent(parent, false);
 
             RectTransform rect = labelObject.GetComponent<RectTransform>();
-
-            // The slot is not rotated.
-            // The padding is applied to the minimum and maximum corners of the frame.
-            rect.anchorMin = new Vector2(0f, 0f); // lower left
-            rect.anchorMax = new Vector2(1f, 1f); // upper right
-            rect.offsetMin = new Vector2(0f, PluginConfig.BottomPadding.Value);
-            rect.offsetMax = new Vector2(-PluginConfig.RightPadding.Value, 0f);
+            ApplyAnchor(rect);
 
             TextMeshProUGUI label = labelObject.AddComponent<TextMeshProUGUI>();
+            ApplyLabelStyle(label);
+            
+            label.text = string.Empty;
+
+            return label;
+        }
+
+        private static void ApplyLabelStyle(TextMeshProUGUI label)
+        {
+            HUDManager hud = HUDManager.Instance;
+            if (hud == null || hud.itemSlotIconFrames == null)
+            {
+                return;
+            }
+
             if (hud.weightCounter != null)
             {
                 label.font = hud.weightCounter.font;
@@ -96,17 +108,50 @@ namespace ScrapValueHUD
             {
                 label.font = TMP_Settings.defaultFontAsset;
             }
-            label.fontSize = PluginConfig.ValueFontSize.Value;
-            label.alignment = TextAlignmentOptions.BottomRight;
+            label.fontSize = ScrapValueHUDConfig.ScrapValueFontSize.Value;
+            label.alignment = GetAlignment();
             label.color = Color.white;
             label.enableWordWrapping = false;
             label.raycastTarget = false;
-            label.text = string.Empty;
-
-            return label;
         }
 
-        private void Refresh()
+        /// <summary>
+        /// Offsets the label's rect so the anchored corner is inset by the padding.
+        /// </summary>
+        private static void ApplyAnchor(RectTransform rect)
+        {
+            var anchor = ScrapValueHUDConfig.ScrapValueAnchor.Value;
+
+            bool right = anchor == LabelAnchor.TopRight || anchor == LabelAnchor.BottomRight;
+            bool top = anchor == LabelAnchor.TopLeft || anchor == LabelAnchor.TopRight;
+
+            float horizontal = ScrapValueHUDConfig.ScrapValueHorizontalPadding.Value;
+            float vertical = ScrapValueHUDConfig.ScrapValueVerticalPadding.Value;
+
+            // quick fix
+            if (!right) horizontal += LeftOffset;
+            if (!top) horizontal += BottomOffset;
+
+            // The label stretches over the whole slot. The anchored corner is pulled
+            // inwards by the padding, and the text is aligned to that corner.
+            rect.anchorMin = new Vector2(0f, 0f); // lower left
+            rect.anchorMax = new Vector2(1f, 1f); // upper right
+            rect.offsetMin = new Vector2(right ? 0f : horizontal, top ? 0f : vertical);
+            rect.offsetMax = new Vector2(right ? -horizontal : 0f, top ? -vertical : 0f);
+        }
+
+        private static TextAlignmentOptions GetAlignment()
+        {
+            switch (ScrapValueHUDConfig.ScrapValueAnchor.Value)
+            {
+                case LabelAnchor.TopLeft: return TextAlignmentOptions.TopLeft;
+                case LabelAnchor.TopRight: return TextAlignmentOptions.TopRight;
+                case LabelAnchor.BottomLeft: return TextAlignmentOptions.BottomLeft;
+                default: return TextAlignmentOptions.BottomRight;
+            }
+        }
+
+        private void Refresh(bool updateDisplay = false)
         {
             if (slotLabels == null) return;
 
@@ -114,6 +159,16 @@ namespace ScrapValueHUD
 
             for (int i = 0; i < slotLabels.Length; i++)
             {
+                if (updateDisplay)
+                {
+                    // Apply font size and other style changes.
+                    ApplyLabelStyle(slotLabels[i]);
+
+                    // Apply anchor and position changes.
+                    RectTransform rect = slotLabels[i].GetComponent<RectTransform>();
+                    ApplyAnchor(rect);
+                }
+
                 GrabbableObject? item = (player != null && i < player.ItemSlots.Length) ? player.ItemSlots[i] : null;
                 UpdateLabel(slotLabels[i], item);
             }
