@@ -1,3 +1,4 @@
+using System;
 using GameNetcodeStuff;
 using TMPro;
 using UnityEngine;
@@ -29,6 +30,8 @@ namespace ScrapValueHUD
                 return;
             }
 
+            ResetItemSlotIconFrames(hud);
+
             slotLabels = new TextMeshProUGUI[hud.itemSlotIconFrames.Length];
             for (int i = 0; i < slotLabels.Length; i++)
             {
@@ -45,6 +48,23 @@ namespace ScrapValueHUD
         }
 
         /// <summary>
+        /// Slot icon frames have an unwanted baked-in rotation; cancel it out.
+        /// </summary>
+        private static void ResetItemSlotIconFrames(HUDManager hud)
+        {
+            if (!PluginConfig.FixRotation.Value) return;
+
+            for (int i = 0; i < hud.itemSlotIconFrames.Length; i++)
+            {
+                hud.itemSlotIconFrames[i].transform.rotation = Quaternion.identity;
+            }
+            for (int i = 0; i < hud.itemSlotIcons.Length; i++)
+            {
+                hud.itemSlotIcons[i].transform.rotation = Quaternion.identity;
+            }
+        }
+
+        /// <summary>
         /// Refreshes the slot labels belonging to the local player, if the overlay exists.
         /// </summary>
         internal static void RefreshLabels()
@@ -57,12 +77,12 @@ namespace ScrapValueHUD
             GameObject labelObject = new GameObject(name, typeof(RectTransform));
             labelObject.transform.SetParent(parent, false);
 
-            // Some slot frames carry a baked-in rotation; cancel it so the text stays upright.
-            labelObject.transform.rotation = Quaternion.identity;
+            RectTransform rect = labelObject.GetComponent<RectTransform>();
 
-            RectTransform rect = (RectTransform)labelObject.transform;
-            rect.anchorMin = Vector2.zero;
-            rect.anchorMax = Vector2.one;
+            // The slot is not rotated.
+            // The padding is applied to the minimum and maximum corners of the frame.
+            rect.anchorMin = new Vector2(0f, 0f); // lower left
+            rect.anchorMax = new Vector2(1f, 1f); // upper right
             rect.offsetMin = new Vector2(0f, PluginConfig.BottomPadding.Value);
             rect.offsetMax = new Vector2(-PluginConfig.RightPadding.Value, 0f);
 
@@ -82,6 +102,7 @@ namespace ScrapValueHUD
             label.enableWordWrapping = false;
             label.raycastTarget = false;
             label.text = string.Empty;
+
             return label;
         }
 

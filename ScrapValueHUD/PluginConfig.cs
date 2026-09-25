@@ -10,6 +10,7 @@ namespace ScrapValueHUD
         internal static ConfigEntry<int> ValueFontSize = null!;
         internal static ConfigEntry<float> BottomPadding = null!;
         internal static ConfigEntry<float> RightPadding = null!;
+        internal static ConfigEntry<bool> FixRotation = null!;
 
         /// <summary>
         /// Binds the configuration entries to the plugin's config file.
@@ -19,7 +20,7 @@ namespace ScrapValueHUD
         {
             ValueFontSize = config.Bind(
                 "Scrap Value",
-                "FontSize",
+                "Font Size",
                 8,
                 new ConfigDescription(
                     "Font size of the scrap value label.",
@@ -27,19 +28,26 @@ namespace ScrapValueHUD
 
             BottomPadding = config.Bind(
                 "Scrap Value",
-                "BottomPadding",
-                10f,
+                "Bottom Padding",
+                2f,
                 new ConfigDescription(
                     "Distance from the bottom of the slot to the label.",
                     new AcceptableValueRange<float>(-64f, 64f)));
 
             RightPadding = config.Bind(
                 "Scrap Value",
-                "RightPadding",
-                10f,
+                "Right Padding",
+                4f,
                 new ConfigDescription(
                     "Distance from the right side of the slot to the label.",
                     new AcceptableValueRange<float>(-64f, 64f)));
+
+            FixRotation = config.Bind(
+                "Misc",
+                "Fix Rotation",
+                true,
+                "Correct the rotation of the slot icon frames.");
+
         }
     }
 }
